@@ -99,3 +99,188 @@ ENV/
 
 # mypy
 .mypy_cache/
+# Début du programme
+#son2 = pygame.mixer.music.load("explosion.wav")
+import pygame
+import time
+import sys
+from pygame.locals import *
+from random import *
+
+pygame.init()
+
+rouge = (255,25,2)
+noir = (2,2,2)
+
+son = pygame.mixer.music.load("sonAvion.wav")# ce code permet de charger la musiquer que l'on souhaite insérer dans le jeu
+pygame.mixer.music.play(-1)#ce code permet de continuer au programme a jouer la musique jusqu'a l'arret du jeu 
+
+surfaceX = 1000
+surfaceY = 600
+avionX = 50
+avionY = 66
+ennemiX = 300
+ennemiY = 300
+
+#Initialisation
+surface = pygame.display.set_mode((surfaceX,surfaceY))
+
+pygame.display.set_caption("Jeu d'avion")
+clock = pygame.time.Clock()
+
+image_fond= pygame.image.load("ciel3.png")
+fond = image_fond.convert()
+pygame.display.flip()
+
+img = pygame.image.load('avion.png')
+img_ennemi01 = pygame.image.load('ennemi.png')
+img_ennemi02 = pygame.image.load('ennemi.png')
+
+
+def score(compte) :
+    police = pygame.font.Font('BradBunR.ttf', 16)
+    texte = police.render("score : " + str(compte), True, noir)
+
+    surface.blit(texte, [10,0])
+
+def ennemis(x_ennemi, y_ennemi, espace):
+    surface.blit(img_ennemi01, (x_ennemi, y_ennemi))
+    surface.blit(img_ennemi02,(x_ennemi,y_ennemi+ ennemiY +espace))
+
+
+def rejoueOuQuitte():
+    for event in pygame.event.get([pygame.KEYDOWN, pygame.KEYUP, pygame.QUIT]):
+        if event.type == pygame.QUIT :
+            pygame.quit()
+            quit()
+        elif event.type ==pygame.KEYUP:
+            continue
+        return event.key
+
+    return  None
+
+def Contenue(texte, font):
+    texteSurface = font.render(texte,True,rouge)
+    return texteSurface, texteSurface.get_rect()
+
+
+def Contenant (texte):
+    TextePrincipale = pygame.font.Font('BradBunR.ttf', 120)
+    TexteSecondaire = pygame.font.Font('BradBunR.ttf',20)
+    dernierTexte = pygame.font.Font('BradBunR.ttf', 50)
+    
+    
+
+    titreTexteSurf, titreTexteRect = Contenue(texte, TextePrincipale)
+    titreTexteRect.center = surfaceX/2,((surfaceY/2)-50)
+    surface.blit(titreTexteSurf, titreTexteRect)
+
+    TexteSecondaireSurf, TexteSecondaireRect = Contenue("appuyer sur une touche pour continuer", TexteSecondaire )
+    TexteSecondaireRect.center = surfaceX/2, ((surfaceY/2) +200)
+    surface.blit(TexteSecondaireSurf, TexteSecondaireRect)
+
+    dernierTexteSurf, dernierTexteRect = Contenue(" Mais la bataille n'est pas finie! ", dernierTexte)
+    dernierTexteRect.center = surfaceX/2, ((surfaceY/2)+50)
+    surface.blit(dernierTexteSurf, dernierTexteRect)
+
+
+    pygame.display.update()
+    time.sleep(1)
+
+    while rejoueOuQuitte() == None :
+        clock.tick()
+
+    fprincipale()
+
+def défaite():
+    Contenant("Vous avez perdu :( ", )
+    
+def avion(x,y, image):
+    surface.blit(image, (x,y))
+
+		
+def fprincipale():
+
+
+    x=150
+    y=250
+    y_move=0
+
+
+
+    x_ennemi = surfaceX
+    y_ennemi = randint(-300,10)
+    espace = avionY*1
+    avionennemi_vitesse = 6
+
+    score_actuel = 0
+
+    boo_léen = False
+
+    
+    while not boo_léen:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                boo_léen= True
+
+
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:                	
+                    y_move = -4
+
+            if event.type ==pygame.KEYUP :
+                y_move = 4
+
+        y += y_move
+
+
+
+        surface.blit(fond, (0,0))
+        avion(x,y,img)
+        ennemis(x_ennemi, y_ennemi, espace)
+        score(score_actuel)
+        x_ennemi -=avionennemi_vitesse
+
+
+
+        if y>surfaceY -40 or y <-10:
+        	défaite()
+        
+     
+
+     
+        if x_ennemi < (-1*ennemiX):
+            x_ennemi = surfaceX
+            y_ennemi = randint(-300,10)
+
+
+
+        if x +avionX > x_ennemi + 60 :
+            if y < y_ennemi + ennemiY  -90:
+                if x - avionX < x_ennemi + ennemiX -80 :
+                    
+                    défaite()
+
+       
+
+
+        if x +avionX > x_ennemi + 100 :
+            if y +avionY > y_ennemi + ennemiY + espace +50 :
+                if x -avionX < x_ennemi+ ennemiX - 20:
+                    
+                    défaite()
+
+        if x_ennemi < (x-ennemiX)<x_ennemi+avionennemi_vitesse :
+            score_actuel +=1
+
+        pygame.display.update()
+        pygame.display.flip()
+        
+
+fprincipale()
+pygame.quit()
+quit()
+
+
+
